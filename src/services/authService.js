@@ -3,6 +3,10 @@ import { saveAuthData, clearAuthData, getStoredToken } from '../utils/tokenUtils
 
 export const authService = {
   async register(username, email, password, fullName) {
+    localStorage.removeItem('fintrack_local_transactions');
+    localStorage.removeItem('fintrack_local_expenses');
+    localStorage.removeItem('fintrack_local_categories');
+    localStorage.removeItem('fintrack_budget_confirmed_month');
     const data = await apiRequest('/api/auth/register', {
       method: 'POST',
       body: JSON.stringify({ username, email, password, fullName })
@@ -14,6 +18,10 @@ export const authService = {
   },
 
   async login(username, password) {
+    localStorage.removeItem('fintrack_local_transactions');
+    localStorage.removeItem('fintrack_local_expenses');
+    localStorage.removeItem('fintrack_local_categories');
+    localStorage.removeItem('fintrack_budget_confirmed_month');
     const data = await apiRequest('/api/auth/login', {
       method: 'POST',
       body: JSON.stringify({ username, password })

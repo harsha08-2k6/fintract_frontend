@@ -1,12 +1,12 @@
 import { apiRequest } from './api';
 
 const DEFAULT_CATEGORIES = [
-  { id: 1, name: 'Food & Dining', icon: 'Utensils', color: '#10B981', budgetLimit: 15000, description: 'Client lunches, team meals, office catering' },
-  { id: 2, name: 'Travel & Transport', icon: 'Car', color: '#4F46E5', budgetLimit: 20000, description: 'Flights, cabs, train tickets, fuel allowances' },
-  { id: 3, name: 'Software & Cloud SaaS', icon: 'Cloud', color: '#06B6D4', budgetLimit: 35000, description: 'AWS, GitHub, Figma, corporate software tooling' },
-  { id: 4, name: 'Office Supplies & Tech', icon: 'Monitor', color: '#F59E0B', budgetLimit: 25000, description: 'Monitors, ergonomic desks, stationery, hardware' },
-  { id: 5, name: 'Client Entertainment', icon: 'Coffee', color: '#EC4899', budgetLimit: 12000, description: 'Corporate events, client gifting, partner summits' },
-  { id: 6, name: 'Utilities & Facilities', icon: 'Zap', color: '#8B5CF6', budgetLimit: 10000, description: 'High-speed internet, electricity, facility maintenance' }
+  { id: 1, name: 'Food & Dining', icon: 'Utensils', color: '#10B981', budgetLimit: 0, description: 'Client lunches, team meals, office catering' },
+  { id: 2, name: 'Travel & Transport', icon: 'Car', color: '#4F46E5', budgetLimit: 0, description: 'Flights, cabs, train tickets, fuel allowances' },
+  { id: 3, name: 'Software & Cloud SaaS', icon: 'Cloud', color: '#06B6D4', budgetLimit: 0, description: 'AWS, GitHub, Figma, corporate software tooling' },
+  { id: 4, name: 'Office Supplies & Tech', icon: 'Monitor', color: '#F59E0B', budgetLimit: 0, description: 'Monitors, ergonomic desks, stationery, hardware' },
+  { id: 5, name: 'Client Entertainment', icon: 'Coffee', color: '#EC4899', budgetLimit: 0, description: 'Corporate events, client gifting, partner summits' },
+  { id: 6, name: 'Utilities & Facilities', icon: 'Zap', color: '#8B5CF6', budgetLimit: 0, description: 'High-speed internet, electricity, facility maintenance' }
 ];
 
 function getLocalCategories() {
