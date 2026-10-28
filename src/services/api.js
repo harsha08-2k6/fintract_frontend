@@ -1,6 +1,7 @@
 import { getStoredToken, getStoredUser } from '../utils/tokenUtils';
 
-const BASE_URL = import.meta.env.VITE_API_GATEWAY_URL || '';
+const RAW_BASE_URL = (import.meta.env.VITE_API_GATEWAY_URL || '').trim();
+const BASE_URL = RAW_BASE_URL.replace(/\/+$/, '');
 
 /**
  * Universal API request wrapper for FinTrack Gateway communication
@@ -22,7 +23,8 @@ export async function apiRequest(endpoint, options = {}) {
     headers['X-User-Id'] = user.id.toString();
   }
 
-  const url = `${BASE_URL}${endpoint}`;
+  const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+  const url = `${BASE_URL}${cleanEndpoint}`;
 
   const response = await fetch(url, {
     ...options,
