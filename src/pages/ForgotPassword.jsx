@@ -7,7 +7,6 @@ export const ForgotPassword = ({ onNavigateLogin }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [submitted, setSubmitted] = useState(false);
-  const [directResetUrl, setDirectResetUrl] = useState('');
 
   const isValidEmail = (val) => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val);
@@ -30,10 +29,7 @@ export const ForgotPassword = ({ onNavigateLogin }) => {
 
     setLoading(true);
     try {
-      const res = await authService.forgotPassword(cleanEmail);
-      if (res && res.resetUrl) {
-        setDirectResetUrl(res.resetUrl);
-      }
+      await authService.forgotPassword(cleanEmail);
       setSubmitted(true);
     } catch (err) {
       // For user safety and enumeration prevention, show generic error or handle rate limiting
@@ -172,7 +168,7 @@ export const ForgotPassword = ({ onNavigateLogin }) => {
 
           <div style={{ marginTop: '2.5rem', paddingTop: '1.5rem', borderTop: '1px solid rgba(255, 255, 255, 0.08)', display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#94A3B8', fontSize: '0.75rem' }}>
             <ShieldCheck size={15} color="#10B981" />
-            <span>Gmail SMTP Relay • STARTTLS 587 Encryption</span>
+            <span>Secure Cloud Mail Relay • End-to-End TLS</span>
           </div>
         </div>
 
@@ -335,40 +331,6 @@ export const ForgotPassword = ({ onNavigateLogin }) => {
               <p style={{ color: '#475569', fontSize: '0.925rem', lineHeight: 1.6, marginBottom: '1.5rem' }}>
                 If an account exists for <strong style={{ color: '#0F172A' }}>{email}</strong>, a password reset link has been dispatched.
               </p>
-
-              {directResetUrl && (
-                <div style={{
-                  background: '#ECFDF5',
-                  border: '1.5px solid #10B981',
-                  borderRadius: '12px',
-                  padding: '1.25rem',
-                  marginBottom: '1.75rem',
-                  textAlign: 'center'
-                }}>
-                  <div style={{ fontSize: '0.9rem', fontWeight: '800', color: '#065F46', marginBottom: '0.35rem' }}>
-                    ⚡ Instant Reset Link Generated
-                  </div>
-                  <p style={{ fontSize: '0.8rem', color: '#047857', margin: '0 0 1rem 0' }}>
-                    Because cloud SMTP can be delayed or filtered, you can reset your password immediately below:
-                  </p>
-                  <a
-                    href={directResetUrl}
-                    style={{
-                      display: 'inline-block',
-                      padding: '0.65rem 1.4rem',
-                      background: '#10B981',
-                      color: '#FFFFFF',
-                      borderRadius: '8px',
-                      fontWeight: '700',
-                      fontSize: '0.875rem',
-                      textDecoration: 'none',
-                      boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)'
-                    }}
-                  >
-                    Reset Password Now &rarr;
-                  </a>
-                </div>
-              )}
 
               <div style={{
                 background: '#F8FAFC',
