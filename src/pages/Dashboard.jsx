@@ -90,9 +90,18 @@ export const Dashboard = ({ onNavigateExpenses, onNavigateAddExpense, onNavigate
       setAllLoadedTransactions(txList);
       setRecentTransactions(txList.slice(0, 5));
 
-      const catList = Array.isArray(categoryData) 
+      let catList = Array.isArray(categoryData) 
         ? categoryData 
         : (categoryData && Array.isArray(categoryData.content) ? categoryData.content : []);
+      
+      // Auto-sanitize legacy mock 1,17,000 budget for new users:
+      const totalBudgetSum = catList.reduce((sum, c) => sum + (c.budgetLimit || 0), 0);
+      if (totalBudgetSum === 117000) {
+        catList = catList.map(c => ({ ...c, budgetLimit: 0 }));
+        try {
+          localStorage.setItem('fintrack_local_categories', JSON.stringify(catList));
+        } catch {}
+      }
       setCategories(catList);
       setLastUpdated(new Date());
     } catch (err) {
@@ -364,35 +373,41 @@ export const Dashboard = ({ onNavigateExpenses, onNavigateAddExpense, onNavigate
             </div>
             <div>
               <h4 style={{ fontSize: '1rem', fontWeight: '700', color: '#0F172A', margin: 0 }}>
-                {currentMonthLabel} Budget Review
+                {financialMetrics.totalBudget > 0 ? `${currentMonthLabel} Budget Review` : `Set Up Your ${currentMonthLabel} Budgets`}
               </h4>
               <p style={{ fontSize: '0.825rem', color: '#475569', margin: '2px 0 0 0' }}>
-                Your current monthly category budget totals <strong>{formatCurrency(financialMetrics.totalBudget)}</strong>. Would you like to continue with these limits for {currentMonthLabel} or adjust them?
+                {financialMetrics.totalBudget > 0 ? (
+                  <>Your current monthly category budget totals <strong>{formatCurrency(financialMetrics.totalBudget)}</strong>. Would you like to continue with these limits for {currentMonthLabel} or adjust them?</>
+                ) : (
+                  <>You haven't set any category budgets yet. Click <strong>Set Category Budgets</strong> to configure your monthly limits and start tracking spending.</>
+                )}
               </p>
             </div>
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-            <button
-              onClick={handleConfirmSameBudget}
-              className="btn btn-secondary"
-              style={{
-                fontSize: '0.825rem',
-                padding: '0.45rem 0.95rem',
-                background: '#FFFFFF',
-                borderColor: '#10B981',
-                color: '#059669',
-                fontWeight: '700'
-              }}
-            >
-              Continue Same Budget
-            </button>
+            {financialMetrics.totalBudget > 0 && (
+              <button
+                onClick={handleConfirmSameBudget}
+                className="btn btn-secondary"
+                style={{
+                  fontSize: '0.825rem',
+                  padding: '0.45rem 0.95rem',
+                  background: '#FFFFFF',
+                  borderColor: '#10B981',
+                  color: '#059669',
+                  fontWeight: '700'
+                }}
+              >
+                Continue Same Budget
+              </button>
+            )}
             <button
               onClick={handleOpenBudgetModal}
               className="btn btn-primary"
-              style={{ fontSize: '0.825rem', padding: '0.45rem 1rem' }}
+              style={{ fontSize: '0.825rem', padding: '0.45rem 1rem', fontWeight: '700' }}
             >
-              Adjust Limits
+              {financialMetrics.totalBudget > 0 ? 'Adjust Limits' : 'Set Category Budgets'}
             </button>
           </div>
         </div>
@@ -451,7 +466,9 @@ export const Dashboard = ({ onNavigateExpenses, onNavigateAddExpense, onNavigate
           <MetricStatCard
             title="Total Monthly Budget Limit"
             value={financialMetrics.totalBudget}
-            subtext="Configured monthly spending ceiling across all categories"
+            subtext={financialMetrics.totalBudget > 0 
+              ? "Configured monthly spending ceiling across all categories" 
+              : "No budget limit configured. Click 'Set Category Budgets' to set one."}
             icon={Sliders}
             valueColor="#2563EB"
             iconBg="#EFF6FF"
@@ -464,9 +481,11 @@ export const Dashboard = ({ onNavigateExpenses, onNavigateAddExpense, onNavigate
           <MetricStatCard
             title="Remaining Monthly Budget"
             value={financialMetrics.remainingBudget}
-            subtext={financialMetrics.remainingBudget >= 0 
-              ? `Unspent out of ${formatCurrency(financialMetrics.totalBudget)} limit (₹${financialMetrics.budgetMonthSpend.toLocaleString('en-IN')} spent this month)`
-              : `Over budget by ${formatCurrency(Math.abs(financialMetrics.remainingBudget))} (₹${financialMetrics.budgetMonthSpend.toLocaleString('en-IN')} spent this month)`}
+            subtext={financialMetrics.totalBudget > 0 
+              ? (financialMetrics.remainingBudget >= 0 
+                  ? `Unspent out of ${formatCurrency(financialMetrics.totalBudget)} limit (₹${financialMetrics.budgetMonthSpend.toLocaleString('en-IN')} spent this month)`
+                  : `Over budget by ${formatCurrency(Math.abs(financialMetrics.remainingBudget))} (₹${financialMetrics.budgetMonthSpend.toLocaleString('en-IN')} spent this month)`)
+              : "No category limits configured. Set limits to track your remaining headroom."}
             icon={financialMetrics.remainingBudget >= 0 ? ShieldCheck : TrendingDown}
             valueColor={financialMetrics.remainingBudget >= 0 ? "#10B981" : "#DC2626"}
             iconBg={financialMetrics.remainingBudget >= 0 ? "#ECFDF5" : "#FEF2F2"}

@@ -16,7 +16,14 @@ function getLocalCategories() {
     return DEFAULT_CATEGORIES;
   }
   try {
-    return JSON.parse(data);
+    const parsed = JSON.parse(data);
+    const total = parsed.reduce((sum, c) => sum + (c.budgetLimit || 0), 0);
+    if (total === 117000) {
+      const reset = parsed.map(c => ({ ...c, budgetLimit: 0 }));
+      localStorage.setItem('fintrack_local_categories', JSON.stringify(reset));
+      return reset;
+    }
+    return parsed;
   } catch {
     return DEFAULT_CATEGORIES;
   }
