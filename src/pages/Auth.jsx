@@ -48,6 +48,15 @@ export const Auth = ({ initialMode = 'login', onSuccess, onNavigateForgotPasswor
   const validRulesCount = passwordRules.filter(r => r.valid).length;
   const passwordIsStrong = isStrongPassword(regData.password);
 
+  // Real-time Confirm Password validation state
+  const confirmPasswordEntered = Boolean(regData.confirmPassword && regData.confirmPassword.length > 0);
+  const passwordsMatch = Boolean(
+    confirmPasswordEntered &&
+    regData.password &&
+    regData.password.length > 0 &&
+    regData.password === regData.confirmPassword
+  );
+
   const getStrengthMeta = () => {
     if (regData.password.length === 0) return { label: 'Empty', color: '#94A3B8', width: '0%' };
     if (validRulesCount <= 2) return { label: 'Weak', color: '#DC2626', width: '25%' };
@@ -88,8 +97,18 @@ export const Auth = ({ initialMode = 'login', onSuccess, onNavigateForgotPasswor
     e.preventDefault();
     setError('');
 
+    if (!regData.password) {
+      setError('Please enter a password.');
+      return;
+    }
+
     if (!passwordIsStrong) {
       setError('Password does not meet all strong security requirements.');
+      return;
+    }
+
+    if (!regData.confirmPassword) {
+      setError('Please confirm your password.');
       return;
     }
 
@@ -281,7 +300,7 @@ export const Auth = ({ initialMode = 'login', onSuccess, onNavigateForgotPasswor
 
         {/* RIGHT COLUMN: Animated Form Container */}
         <div style={{
-          padding: '3rem 2.75rem',
+          padding: mode === 'register' ? '2.25rem 2.75rem' : '3rem 2.75rem',
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'center',
@@ -549,11 +568,12 @@ export const Auth = ({ initialMode = 'login', onSuccess, onNavigateForgotPasswor
               <form onSubmit={handleRegSubmit}>
                 {/* Full Name */}
                 <div style={{ marginBottom: '0.85rem' }}>
-                  <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: '700', color: '#475569', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.3rem' }}>
+                  <label htmlFor="reg-fullName" style={{ display: 'block', fontSize: '0.72rem', fontWeight: '700', color: '#475569', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.3rem' }}>
                     FULL NAME
                   </label>
                   <div style={{ position: 'relative' }}>
                     <input
+                      id="reg-fullName"
                       type="text"
                       name="fullName"
                       placeholder="Enter your full name"
@@ -579,11 +599,12 @@ export const Auth = ({ initialMode = 'login', onSuccess, onNavigateForgotPasswor
                 {/* Username & Email Grid */}
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.65rem', marginBottom: '0.85rem' }}>
                   <div>
-                    <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: '700', color: '#475569', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.3rem' }}>
+                    <label htmlFor="reg-username" style={{ display: 'block', fontSize: '0.72rem', fontWeight: '700', color: '#475569', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.3rem' }}>
                       USERNAME
                     </label>
                     <div style={{ position: 'relative' }}>
                       <input
+                        id="reg-username"
                         type="text"
                         name="username"
                         placeholder="Username"
@@ -607,11 +628,12 @@ export const Auth = ({ initialMode = 'login', onSuccess, onNavigateForgotPasswor
                   </div>
 
                   <div>
-                    <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: '700', color: '#475569', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.3rem' }}>
+                    <label htmlFor="reg-email" style={{ display: 'block', fontSize: '0.72rem', fontWeight: '700', color: '#475569', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.3rem' }}>
                       EMAIL
                     </label>
                     <div style={{ position: 'relative' }}>
                       <input
+                        id="reg-email"
                         type="email"
                         name="email"
                         placeholder="corp@domain.com"
@@ -635,62 +657,155 @@ export const Auth = ({ initialMode = 'login', onSuccess, onNavigateForgotPasswor
                   </div>
                 </div>
 
-                {/* Password & Confirm Grid */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.65rem', marginBottom: '0.75rem' }}>
-                  <div>
-                    <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: '700', color: '#475569', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.3rem' }}>
-                      PASSWORD
-                    </label>
-                    <div style={{ position: 'relative' }}>
-                      <input
-                        type={showPassword ? 'text' : 'password'}
-                        name="password"
-                        placeholder="••••••••"
-                        value={regData.password}
-                        onChange={handleRegChange}
-                        required
-                        style={{
-                          width: '100%',
-                          padding: '0.68rem 0.65rem 0.68rem 2.2rem',
-                          background: '#F8FAFC',
-                          border: `1px solid ${regData.password ? strengthMeta.color : '#E2E8F0'}`,
-                          borderRadius: '8px',
-                          color: '#0F172A',
-                          fontSize: '0.875rem',
-                          outline: 'none',
-                          transition: 'border-color 0.2s ease'
-                        }}
-                      />
-                      <Lock size={14} color="#94A3B8" style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)' }} />
-                    </div>
+                {/* Password Field */}
+                <div style={{ marginBottom: '0.85rem' }}>
+                  <label
+                    htmlFor="reg-password"
+                    style={{
+                      display: 'block',
+                      fontSize: '0.72rem',
+                      fontWeight: '700',
+                      color: '#475569',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.05em',
+                      marginBottom: '0.3rem'
+                    }}
+                  >
+                    PASSWORD
+                  </label>
+                  <div style={{ position: 'relative' }}>
+                    <input
+                      id="reg-password"
+                      type={showPassword ? 'text' : 'password'}
+                      name="password"
+                      placeholder="••••••••"
+                      value={regData.password}
+                      onChange={handleRegChange}
+                      required
+                      autoComplete="new-password"
+                      style={{
+                        width: '100%',
+                        padding: '0.68rem 0.65rem 0.68rem 2.2rem',
+                        background: '#F8FAFC',
+                        border: `1px solid ${regData.password ? strengthMeta.color : '#E2E8F0'}`,
+                        borderRadius: '8px',
+                        color: '#0F172A',
+                        fontSize: '0.875rem',
+                        outline: 'none',
+                        transition: 'border-color 0.2s ease, box-shadow 0.2s ease'
+                      }}
+                      onFocus={(e) => {
+                        e.target.style.borderColor = regData.password ? strengthMeta.color : '#10B981';
+                        e.target.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.15)';
+                        e.target.style.background = '#FFFFFF';
+                      }}
+                      onBlur={(e) => {
+                        e.target.style.borderColor = regData.password ? strengthMeta.color : '#E2E8F0';
+                        e.target.style.boxShadow = 'none';
+                        e.target.style.background = '#F8FAFC';
+                      }}
+                    />
+                    <Lock size={14} color="#94A3B8" style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)' }} />
+                  </div>
+                </div>
+
+                {/* Confirm Password Field (placed below Password field) */}
+                <div style={{ marginBottom: '0.85rem' }}>
+                  <label
+                    htmlFor="reg-confirm-password"
+                    style={{
+                      display: 'block',
+                      fontSize: '0.72rem',
+                      fontWeight: '700',
+                      color: '#475569',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.05em',
+                      marginBottom: '0.3rem'
+                    }}
+                  >
+                    CONFIRM PASSWORD
+                  </label>
+                  <div style={{ position: 'relative' }}>
+                    <input
+                      id="reg-confirm-password"
+                      type={showPassword ? 'text' : 'password'}
+                      name="confirmPassword"
+                      placeholder="••••••••"
+                      value={regData.confirmPassword}
+                      onChange={handleRegChange}
+                      required
+                      autoComplete="new-password"
+                      aria-invalid={confirmPasswordEntered ? !passwordsMatch : undefined}
+                      aria-describedby={confirmPasswordEntered ? 'reg-confirm-feedback' : undefined}
+                      style={{
+                        width: '100%',
+                        padding: '0.68rem 0.65rem 0.68rem 2.2rem',
+                        background: '#F8FAFC',
+                        border: `1px solid ${
+                          confirmPasswordEntered
+                            ? (passwordsMatch ? '#10B981' : '#DC2626')
+                            : '#E2E8F0'
+                        }`,
+                        borderRadius: '8px',
+                        color: '#0F172A',
+                        fontSize: '0.875rem',
+                        outline: 'none',
+                        transition: 'border-color 0.2s ease, box-shadow 0.2s ease'
+                      }}
+                      onFocus={(e) => {
+                        if (!confirmPasswordEntered) {
+                          e.target.style.borderColor = '#10B981';
+                          e.target.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.15)';
+                        } else if (passwordsMatch) {
+                          e.target.style.borderColor = '#10B981';
+                          e.target.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.15)';
+                        } else {
+                          e.target.style.borderColor = '#DC2626';
+                          e.target.style.boxShadow = '0 0 0 3px rgba(220, 38, 38, 0.15)';
+                        }
+                        e.target.style.background = '#FFFFFF';
+                      }}
+                      onBlur={(e) => {
+                        e.target.style.borderColor = confirmPasswordEntered
+                          ? (passwordsMatch ? '#10B981' : '#DC2626')
+                          : '#E2E8F0';
+                        e.target.style.boxShadow = 'none';
+                        e.target.style.background = '#F8FAFC';
+                      }}
+                    />
+                    <Lock size={14} color="#94A3B8" style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)' }} />
                   </div>
 
-                  <div>
-                    <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: '700', color: '#475569', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.3rem' }}>
-                      CONFIRM
-                    </label>
-                    <div style={{ position: 'relative' }}>
-                      <input
-                        type={showPassword ? 'text' : 'password'}
-                        name="confirmPassword"
-                        placeholder="••••••••"
-                        value={regData.confirmPassword}
-                        onChange={handleRegChange}
-                        required
-                        style={{
-                          width: '100%',
-                          padding: '0.68rem 0.65rem 0.68rem 2.2rem',
-                          background: '#F8FAFC',
-                          border: `1px solid ${regData.confirmPassword && regData.password === regData.confirmPassword ? '#10B981' : '#E2E8F0'}`,
-                          borderRadius: '8px',
-                          color: '#0F172A',
-                          fontSize: '0.875rem',
-                          outline: 'none'
-                        }}
-                      />
-                      <Lock size={14} color="#94A3B8" style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)' }} />
+                  {/* Real-time Validation Message */}
+                  {confirmPasswordEntered && (
+                    <div
+                      id="reg-confirm-feedback"
+                      role="status"
+                      aria-live="polite"
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.35rem',
+                        fontSize: '0.75rem',
+                        fontWeight: '600',
+                        marginTop: '0.35rem',
+                        color: passwordsMatch ? '#10B981' : '#DC2626',
+                        transition: 'color 0.2s ease'
+                      }}
+                    >
+                      {passwordsMatch ? (
+                        <>
+                          <CheckCircle2 size={13} color="#10B981" />
+                          <span>Passwords match.</span>
+                        </>
+                      ) : (
+                        <>
+                          <XCircle size={13} color="#DC2626" />
+                          <span>Passwords do not match.</span>
+                        </>
+                      )}
                     </div>
-                  </div>
+                  )}
                 </div>
 
                 {/* 🛡️ Real-Time Strong Password Requirements Panel */}
