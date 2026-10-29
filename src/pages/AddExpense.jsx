@@ -2,7 +2,6 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { transactionService } from '../services/transactionService';
 import { expenseService } from '../services/expenseService';
 import { categoryService } from '../services/categoryService';
-import { notificationService } from '../services/notificationService';
 import { formatCurrency } from '../utils/formatCurrency';
 import { formatDate } from '../utils/formatDate';
 import {
@@ -256,43 +255,6 @@ export const AddExpense = ({ onSuccess, onCancel, onNavigateCategories }) => {
 
       setSavedExpense(result || payload);
       setSuccessMsg(`Expense of ${formatCurrency(amtNum)} recorded successfully!`);
-
-      // 1. Transaction Notification
-      const catDisplayName = selectedCat ? formatCatName(selectedCat.name) : 'General';
-      notificationService.createNotification({
-        title: 'Expense recorded successfully',
-        message: `${formatCurrency(amtNum)} expense added to ${catDisplayName}.`,
-        category: 'TRANSACTION',
-        severity: 'INFO',
-        actionUrl: 'expenses',
-        metadata: { title: titleClean, amount: amtNum, categoryName: catDisplayName }
-      });
-
-      // 2. Budget Alert Notification (if budget threshold exceeded or reached)
-      if (liveBudgetFeedback && selectedCat && parseFloat(selectedCat.budgetLimit) > 0) {
-        const limitVal = parseFloat(selectedCat.budgetLimit);
-        const newUsage = liveBudgetFeedback.usagePercent;
-        if (liveBudgetFeedback.isBreached) {
-          notificationService.createNotification({
-            title: `${catDisplayName} budget exceeded!`,
-            message: `Spending reached ${formatCurrency(liveBudgetFeedback.newTotalSpent)} against the ${formatCurrency(limitVal)} monthly cap.`,
-            category: 'BUDGET',
-            severity: 'CRITICAL',
-            actionUrl: 'categories',
-            metadata: { categoryId: selectedCat.id, spent: liveBudgetFeedback.newTotalSpent, limit: limitVal }
-          });
-        } else if (newUsage >= 80) {
-          const remainingAmt = Math.max(0, limitVal - liveBudgetFeedback.newTotalSpent);
-          notificationService.createNotification({
-            title: `${catDisplayName} budget is ${Math.round(newUsage)}% used`,
-            message: `Only ${formatCurrency(remainingAmt)} remaining of ${formatCurrency(limitVal)} monthly limit.`,
-            category: 'BUDGET',
-            severity: 'WARNING',
-            actionUrl: 'categories',
-            metadata: { categoryId: selectedCat.id, spent: liveBudgetFeedback.newTotalSpent, limit: limitVal }
-          });
-        }
-      }
 
       // Reset form but keep current category & date for easy subsequent entries
       setFormData(prev => ({
@@ -764,4 +726,3 @@ export const AddExpense = ({ onSuccess, onCancel, onNavigateCategories }) => {
     </div>
   );
 };
-

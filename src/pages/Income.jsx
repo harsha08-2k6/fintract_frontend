@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { transactionService } from '../services/transactionService';
-import { notificationService } from '../services/notificationService';
 import { Modal } from '../components/Modal';
 import { 
   Plus, 
@@ -269,17 +268,7 @@ export const Income = () => {
       }
 
       setIsModalOpen(false);
-      const loggedAmount = parseFloat(formData.amount);
       const titleClean = formData.title.trim();
-
-      notificationService.createNotification({
-        title: 'Income recorded successfully',
-        message: `${formatCurrency(loggedAmount)} deposited (${titleClean}).`,
-        category: 'TRANSACTION',
-        severity: 'SUCCESS',
-        actionUrl: 'income',
-        metadata: { title: titleClean, amount: loggedAmount, sourceCategory: formData.sourceCategory }
-      });
 
       setFormData({
         title: '',

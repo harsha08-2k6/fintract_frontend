@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { authService } from '../services/authService';
-import { notificationService } from '../services/notificationService';
 import { getPasswordRuleResults, isStrongPassword } from '../utils/passwordValidation';
 import { formatDate } from '../utils/formatDate';
 import { 
@@ -110,16 +109,6 @@ export const Profile = () => {
         passwordForm.newPassword
       );
       setPasswordSuccess('Password changed successfully! Please use your new password next time you sign in.');
-
-      // Security Notification
-      notificationService.createNotification({
-        title: 'Your password was changed successfully',
-        message: 'Your account credentials were updated. If you did not make this change, please contact support immediately.',
-        category: 'SECURITY',
-        severity: 'CRITICAL',
-        actionUrl: 'profile',
-        metadata: { event: 'PASSWORD_CHANGED', timestamp: new Date().toISOString() }
-      });
 
       setPasswordForm({
         currentPassword: '',

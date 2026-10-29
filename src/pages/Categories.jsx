@@ -2,7 +2,6 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { categoryService } from '../services/categoryService';
 import { expenseService } from '../services/expenseService';
 import { reportService } from '../services/reportService';
-import { notificationService } from '../services/notificationService';
 import { CategoryCard } from '../components/CategoryCard';
 import { Modal } from '../components/Modal';
 import {
@@ -440,22 +439,12 @@ export const Categories = ({ onNavigateExpenses }) => {
         icon: editingCategory.icon || 'tag'
       });
       const updatedName = trimmedName;
-      const newLimit = formData.budgetLimit ? Math.max(0, parseFloat(formData.budgetLimit)) : 0;
       setEditingCategory(null);
       setFormData({ name: '', description: '', colorCode: '#10B981', budgetLimit: '' });
       setSelectedTemplateName(null);
       await fetchCategoriesAndTransactions();
       showNotification('success', `Category "${updatedName}" updated successfully.`);
 
-      // Budget threshold configuration notification
-      notificationService.createNotification({
-        title: `Budget limit updated for ${updatedName}`,
-        message: `Monthly spending limit set to ${formatCurrency(newLimit)}. FinTrack will alert you at 80% and 100% capacity.`,
-        category: 'BUDGET',
-        severity: 'INFO',
-        actionUrl: 'categories',
-        metadata: { categoryId: editingCategory.id, categoryName: updatedName, limit: newLimit }
-      });
     } catch (err) {
       setFormError(err.message || 'Failed to update category');
     }

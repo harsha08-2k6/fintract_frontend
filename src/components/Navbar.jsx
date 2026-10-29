@@ -42,6 +42,7 @@ export const Navbar = ({ activePage, onAddExpenseClick, onNavigate }) => {
       setLastEventTime(new Date());
     } catch (err) {
       console.error('Failed to load notifications:', err);
+      setNotifications([]);
       setEngineStatus('ERROR');
     }
   };
@@ -49,20 +50,14 @@ export const Navbar = ({ activePage, onAddExpenseClick, onNavigate }) => {
   useEffect(() => {
     reloadNotifications();
 
-    const handleUpdate = () => {
-      reloadNotifications();
-    };
-
     const handlePrefsUpdate = () => {
       setPreferences(notificationService.getPreferences());
     };
 
-    window.addEventListener('fintrack_notifications_updated', handleUpdate);
     window.addEventListener('fintrack_notification_prefs_updated', handlePrefsUpdate);
     const interval = setInterval(reloadNotifications, 15000); // Poll every 15s
 
     return () => {
-      window.removeEventListener('fintrack_notifications_updated', handleUpdate);
       window.removeEventListener('fintrack_notification_prefs_updated', handlePrefsUpdate);
       clearInterval(interval);
     };
@@ -549,7 +544,29 @@ export const Navbar = ({ activePage, onAddExpenseClick, onNavigate }) => {
 
               {/* Notification List Body */}
               <div style={{ maxHeight: '380px', overflowY: 'auto', padding: '0.75rem' }}>
-                {filteredNotifications.length === 0 ? (
+                {engineStatus === 'ERROR' ? (
+                  <div style={{ textAlign: 'center', padding: '3rem 1.5rem' }}>
+                    <div style={{
+                      width: '46px',
+                      height: '46px',
+                      borderRadius: '50%',
+                      background: '#FEF2F2',
+                      color: '#DC2626',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      margin: '0 auto 0.75rem auto'
+                    }}>
+                      <AlertTriangle size={22} />
+                    </div>
+                    <h4 style={{ fontSize: '0.95rem', fontWeight: '700', color: '#991B1B', marginBottom: '0.25rem' }}>
+                      Notifications unavailable
+                    </h4>
+                    <p style={{ fontSize: '0.78rem', color: '#64748B', margin: 0 }}>
+                      We could not load your persisted notifications. Please try again later.
+                    </p>
+                  </div>
+                ) : filteredNotifications.length === 0 ? (
                   <div style={{ textAlign: 'center', padding: '3rem 1.5rem' }}>
                     <div style={{
                       width: '46px',

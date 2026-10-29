@@ -1,4 +1,4 @@
-import { getStoredToken, getStoredUser } from '../utils/tokenUtils';
+import { getStoredToken } from '../utils/tokenUtils';
 
 const RAW_BASE_URL = (import.meta.env.VITE_API_GATEWAY_URL || '').trim();
 const BASE_URL = RAW_BASE_URL.replace(/\/+$/, '');
@@ -8,8 +8,6 @@ const BASE_URL = RAW_BASE_URL.replace(/\/+$/, '');
  */
 export async function apiRequest(endpoint, options = {}) {
   const token = getStoredToken();
-  const user = getStoredUser();
-
   const headers = {
     'Content-Type': 'application/json',
     ...(options.headers || {})
@@ -17,10 +15,6 @@ export async function apiRequest(endpoint, options = {}) {
 
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;
-  }
-
-  if (user && user.id) {
-    headers['X-User-Id'] = user.id.toString();
   }
 
   const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;

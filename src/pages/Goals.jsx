@@ -3,7 +3,6 @@ import { Plus, Target, Trash2, Pencil, CalendarDays, TrendingUp, WalletCards, Cl
 import { Modal } from '../components/Modal';
 import { formatCurrency } from '../utils/formatCurrency';
 import { useAuth } from '../context/AuthContext';
-import { notificationService } from '../services/notificationService';
 
 const BASE_STORAGE_KEY = 'fintrack_savings_goals';
 
@@ -186,31 +185,6 @@ export const Goals = () => {
     updateProgress(contributionGoal, updatedAmount);
     setContributionGoal(null);
 
-    // Savings goal contribution notification
-    const goalName = contributionGoal.name;
-    const isCompleted = newProgress === 100;
-    notificationService.createNotification({
-      title: isCompleted ? `Goal "${goalName}" reached! 🎉` : `${goalName} savings goal updated`,
-      message: isCompleted
-        ? `Congratulations! Target of ${formatCurrency(targetAmt)} has been fully reached.`
-        : `${formatCurrency(amount)} contribution added. Your goal is now ${newProgress}% complete (${formatCurrency(updatedAmount)} of ${formatCurrency(targetAmt)} saved).`,
-      category: 'GOAL',
-      severity: isCompleted ? 'SUCCESS' : 'INFO',
-      actionUrl: 'goals',
-      metadata: { goalId: contributionGoal.id, goalName, amount, currentAmount: updatedAmount, targetAmount: targetAmt, progress: newProgress }
-    });
-
-    // Notify backend email notification engine
-    notificationService.recordSavingsGoalEvent({
-      goalId: String(contributionGoal.id),
-      goalName,
-      targetAmount: targetAmt,
-      currentAmount: updatedAmount,
-      contributionAmount: amount,
-      progressPercentage: newProgress,
-      targetDate: contributionGoal.targetDate || null,
-      eventType: isCompleted ? 'MILESTONE' : 'CONTRIBUTION'
-    });
   };
 
   const removeGoal = (id) => {
