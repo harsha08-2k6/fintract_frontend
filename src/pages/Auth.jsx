@@ -539,7 +539,7 @@ export const Auth = ({ initialMode = 'login', onSuccess, onNavigateForgotPasswor
               {/* Form Header */}
               <div style={{ marginBottom: '1.25rem' }}>
                 <h2 style={{ fontSize: '1.75rem', fontWeight: '800', color: '#0F172A', letterSpacing: '-0.03em', marginBottom: '0.25rem' }}>
-                  Create an account
+                  Create account
                 </h2>
                 <p style={{ color: '#64748B', fontSize: '0.85rem' }}>
                   Set up your FinTrack corporate administrator profile
@@ -663,15 +663,13 @@ export const Auth = ({ initialMode = 'login', onSuccess, onNavigateForgotPasswor
                     htmlFor="reg-password"
                     style={{
                       display: 'block',
-                      fontSize: '0.72rem',
-                      fontWeight: '700',
-                      color: '#475569',
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.05em',
+                      fontSize: '0.78rem',
+                      fontWeight: '600',
+                      color: '#334155',
                       marginBottom: '0.3rem'
                     }}
                   >
-                    PASSWORD
+                    Password
                   </label>
                   <div style={{ position: 'relative' }}>
                     <input
@@ -715,15 +713,13 @@ export const Auth = ({ initialMode = 'login', onSuccess, onNavigateForgotPasswor
                     htmlFor="reg-confirm-password"
                     style={{
                       display: 'block',
-                      fontSize: '0.72rem',
-                      fontWeight: '700',
-                      color: '#475569',
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.05em',
+                      fontSize: '0.78rem',
+                      fontWeight: '600',
+                      color: '#334155',
                       marginBottom: '0.3rem'
                     }}
                   >
-                    CONFIRM PASSWORD
+                    Confirm password
                   </label>
                   <div style={{ position: 'relative' }}>
                     <input
@@ -885,7 +881,7 @@ export const Auth = ({ initialMode = 'login', onSuccess, onNavigateForgotPasswor
                     e.currentTarget.style.transform = 'translateY(0)';
                   }}
                 >
-                  {loading ? 'Creating Account...' : 'Complete Registration'}
+                  {loading ? 'Creating account...' : 'Create account'}
                 </button>
               </form>
 
