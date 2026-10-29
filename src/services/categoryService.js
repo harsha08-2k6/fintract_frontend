@@ -62,7 +62,7 @@ export const categoryService = {
       const newCat = {
         id: Date.now(),
         ...categoryData,
-        budgetLimit: parseFloat(categoryData.budgetLimit) || 10000
+        budgetLimit: categoryData.budgetLimit ? Math.max(0, parseFloat(categoryData.budgetLimit)) : 0
       };
       cats.push(newCat);
       saveLocalCategories(cats);

@@ -18,9 +18,116 @@ import {
   Calendar,
   ExternalLink,
   CheckCircle,
-  AlertCircle
+  AlertCircle,
+  AlertTriangle,
+  Utensils,
+  Car,
+  ShoppingBag,
+  Film,
+  Zap,
+  HeartPulse,
+  GraduationCap,
+  Home,
+  Plane,
+  PiggyBank,
+  Trash2,
+  Edit2
 } from 'lucide-react';
 import { formatCurrency } from '../utils/formatCurrency';
+
+// Predefined Category Templates (Zero predefined amounts / no default budget)
+const CATEGORY_TEMPLATES = [
+  {
+    name: 'Food & Dining',
+    description: 'Restaurants, groceries, snacks and food delivery',
+    colorCode: '#10B981',
+    icon: 'Utensils'
+  },
+  {
+    name: 'Transportation',
+    description: 'Fuel, public transport, cabs and parking',
+    colorCode: '#0284C7',
+    icon: 'Car'
+  },
+  {
+    name: 'Shopping',
+    description: 'Clothing, accessories and personal purchases',
+    colorCode: '#6366F1',
+    icon: 'ShoppingBag'
+  },
+  {
+    name: 'Entertainment',
+    description: 'Movies, games, subscriptions and leisure',
+    colorCode: '#4F46E5',
+    icon: 'Film'
+  },
+  {
+    name: 'Bills & Utilities',
+    description: 'Electricity, water, internet and phone bills',
+    colorCode: '#F59E0B',
+    icon: 'Zap'
+  },
+  {
+    name: 'Healthcare',
+    description: 'Medicines, medical visits and health expenses',
+    colorCode: '#DC2626',
+    icon: 'HeartPulse'
+  },
+  {
+    name: 'Education',
+    description: 'Books, courses, tuition and learning materials',
+    colorCode: '#6366F1',
+    icon: 'GraduationCap'
+  },
+  {
+    name: 'Rent & Housing',
+    description: 'Rent, maintenance and household expenses',
+    colorCode: '#059669',
+    icon: 'Home'
+  },
+  {
+    name: 'Travel',
+    description: 'Trips, accommodation and travel bookings',
+    colorCode: '#0284C7',
+    icon: 'Plane'
+  },
+  {
+    name: 'Investments',
+    description: 'Investments and financial contributions',
+    colorCode: '#10B981',
+    icon: 'TrendingUp'
+  },
+  {
+    name: 'Personal Care',
+    description: 'Grooming, salon and personal care products',
+    colorCode: '#4F46E5',
+    icon: 'Sparkles'
+  },
+  {
+    name: 'Savings',
+    description: 'Monthly savings goals and planned contributions',
+    colorCode: '#059669',
+    icon: 'PiggyBank'
+  }
+];
+
+const getTemplateIcon = (iconName, size = 15) => {
+  switch (iconName) {
+    case 'Utensils': return <Utensils size={size} />;
+    case 'Car': return <Car size={size} />;
+    case 'ShoppingBag': return <ShoppingBag size={size} />;
+    case 'Film': return <Film size={size} />;
+    case 'Zap': return <Zap size={size} />;
+    case 'HeartPulse': return <HeartPulse size={size} />;
+    case 'GraduationCap': return <GraduationCap size={size} />;
+    case 'Home': return <Home size={size} />;
+    case 'Plane': return <Plane size={size} />;
+    case 'TrendingUp': return <TrendingUp size={size} />;
+    case 'Sparkles': return <Sparkles size={size} />;
+    case 'PiggyBank': return <PiggyBank size={size} />;
+    default: return <Tag size={size} />;
+  }
+};
 
 export const Categories = ({ onNavigateExpenses }) => {
   const [categories, setCategories] = useState([]);
@@ -28,6 +135,9 @@ export const Categories = ({ onNavigateExpenses }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState(null);
+  const [categoryToDelete, setCategoryToDelete] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [selectedTemplateName, setSelectedTemplateName] = useState(null);
   const [inspectingCategory, setInspectingCategory] = useState(null);
   const [loading, setLoading] = useState(true);
   const [notification, setNotification] = useState(null); // { type: 'success' | 'error', message: string }
@@ -178,42 +288,99 @@ export const Categories = ({ onNavigateExpenses }) => {
     }
   };
 
+  const handleOpenCreateModal = () => {
+    setFormError('');
+    setSelectedTemplateName(null);
+    setFormData({
+      name: '',
+      description: '',
+      colorCode: '#10B981',
+      budgetLimit: ''
+    });
+    setIsCreateModalOpen(true);
+  };
+
+  const handleSelectTemplate = (template) => {
+    setSelectedTemplateName(template.name);
+    setFormData(prev => ({
+      ...prev,
+      name: template.name,
+      description: template.description,
+      colorCode: template.colorCode,
+      // CRITICAL: Preserve current budgetLimit if entered, do NOT insert any monetary amount!
+      budgetLimit: prev.budgetLimit || ''
+    }));
+  };
+
+  const handleSelectCustom = () => {
+    setSelectedTemplateName('CUSTOM');
+  };
+
   const handleOpenEdit = (category) => {
     setFormError('');
     setEditingCategory(category);
+    // If the category name matches a template, highlight that template; otherwise 'CUSTOM'
+    const matchedTmpl = CATEGORY_TEMPLATES.find(t => t.name.toLowerCase() === category.name.toLowerCase());
+    setSelectedTemplateName(matchedTmpl ? matchedTmpl.name : 'CUSTOM');
     setFormData({
       name: category.name,
       description: category.description || '',
       colorCode: category.colorCode || '#10B981',
-      budgetLimit: category.budgetLimit ? category.budgetLimit.toString() : ''
+      budgetLimit: category.budgetLimit && parseFloat(category.budgetLimit) > 0 ? category.budgetLimit.toString() : ''
     });
   };
 
-  const handleDelete = async (id) => {
+  const handleRequestDelete = (id) => {
     const target = categories.find(c => c.id === id);
-    const categoryName = target?.name || 'Category';
-    const spentOnCategory = breakdownMap[id] || 0;
-    if (spentOnCategory > 0) {
-      alert(`Cannot delete "${categoryName}" because it has active spending records (${formatCurrency(spentOnCategory)}). Please reassign or remove transactions first to prevent orphaned records.`);
-      return;
-    }
+    if (!target) return;
+    setFormError('');
+    setCategoryToDelete(target);
+  };
 
-    if (window.confirm(`Are you sure you want to delete "${categoryName}"? This action cannot be undone.`)) {
-      try {
-        await categoryService.deleteCategory(id);
-        await fetchCategoriesAndTransactions();
-        showNotification('success', `Category "${categoryName}" deleted successfully.`);
-      } catch (err) {
-        showNotification('error', 'Could not delete category: ' + err.message);
-      }
+  const handleConfirmDelete = async () => {
+    if (!categoryToDelete) return;
+    setIsDeleting(true);
+    try {
+      await categoryService.deleteCategory(categoryToDelete.id);
+      const deletedName = categoryToDelete.name;
+      setCategoryToDelete(null);
+      await fetchCategoriesAndTransactions();
+      showNotification('success', `Category "${deletedName}" deleted successfully.`);
+    } catch (err) {
+      showNotification('error', 'Could not delete category: ' + (err.message || 'Deletion failed'));
+    } finally {
+      setIsDeleting(false);
     }
   };
+
+  const linkedExpensesForDelete = useMemo(() => {
+    if (!categoryToDelete) return [];
+    return allExpenses.filter(exp => {
+      const expCatId = exp.categoryId || exp.category?.id;
+      return String(expCatId) === String(categoryToDelete.id) ||
+        (exp.category?.name && exp.category.name.toLowerCase() === categoryToDelete.name.toLowerCase());
+    });
+  }, [categoryToDelete, allExpenses]);
+
+  const spentOnCategoryToDelete = useMemo(() => {
+    if (!categoryToDelete) return 0;
+    return linkedExpensesForDelete.reduce((sum, exp) => sum + (parseFloat(exp.amount) || 0), 0);
+  }, [categoryToDelete, linkedExpensesForDelete]);
 
   const handleCreate = async (e) => {
     e.preventDefault();
     setFormError('');
-    if (!formData.name.trim()) {
+    const trimmedName = formData.name.trim();
+    if (!trimmedName) {
       setFormError('Category name is required.');
+      return;
+    }
+
+    const isDuplicate = categories.some(
+      c => c.name.trim().toLowerCase() === trimmedName.toLowerCase()
+    );
+    if (isDuplicate) {
+      setFormError(`A category with the name "${trimmedName}" already exists.`);
       return;
     }
 
@@ -224,7 +391,7 @@ export const Categories = ({ onNavigateExpenses }) => {
 
     try {
       const created = await categoryService.createCategory({
-        name: formData.name.trim(),
+        name: trimmedName,
         description: formData.description.trim(),
         colorCode: formData.colorCode,
         budgetLimit: formData.budgetLimit ? Math.max(0, parseFloat(formData.budgetLimit)) : 0,
@@ -232,8 +399,9 @@ export const Categories = ({ onNavigateExpenses }) => {
       });
       setIsCreateModalOpen(false);
       setFormData({ name: '', description: '', colorCode: '#10B981', budgetLimit: '' });
+      setSelectedTemplateName(null);
       await fetchCategoriesAndTransactions();
-      showNotification('success', `Category "${created?.name || formData.name}" created successfully.`);
+      showNotification('success', `Category "${created?.name || trimmedName}" created successfully.`);
     } catch (err) {
       setFormError(err.message || 'Failed to create category');
     }
@@ -243,9 +411,18 @@ export const Categories = ({ onNavigateExpenses }) => {
     e.preventDefault();
     if (!editingCategory) return;
     setFormError('');
+    const trimmedName = formData.name.trim();
 
-    if (!formData.name.trim()) {
+    if (!trimmedName) {
       setFormError('Category name is required.');
+      return;
+    }
+
+    const isDuplicate = categories.some(
+      c => c.id !== editingCategory.id && c.name.trim().toLowerCase() === trimmedName.toLowerCase()
+    );
+    if (isDuplicate) {
+      setFormError(`A category with the name "${trimmedName}" already exists.`);
       return;
     }
 
@@ -256,16 +433,17 @@ export const Categories = ({ onNavigateExpenses }) => {
 
     try {
       await categoryService.updateCategory(editingCategory.id, {
-        name: formData.name.trim(),
+        name: trimmedName,
         description: formData.description.trim(),
         colorCode: formData.colorCode,
         budgetLimit: formData.budgetLimit ? Math.max(0, parseFloat(formData.budgetLimit)) : 0,
         icon: editingCategory.icon || 'tag'
       });
-      const updatedName = formData.name.trim();
+      const updatedName = trimmedName;
       const newLimit = formData.budgetLimit ? Math.max(0, parseFloat(formData.budgetLimit)) : 0;
       setEditingCategory(null);
       setFormData({ name: '', description: '', colorCode: '#10B981', budgetLimit: '' });
+      setSelectedTemplateName(null);
       await fetchCategoriesAndTransactions();
       showNotification('success', `Category "${updatedName}" updated successfully.`);
 
@@ -507,7 +685,7 @@ export const Categories = ({ onNavigateExpenses }) => {
               key={cat.id}
               category={cat}
               spent={breakdownMap[cat.id] || 0}
-              onDelete={handleDelete}
+              onDelete={handleRequestDelete}
               onEdit={handleOpenEdit}
               onSelect={(category) => setInspectingCategory(category)}
             />
@@ -516,7 +694,7 @@ export const Categories = ({ onNavigateExpenses }) => {
       )}
 
       {/* Modal to Create Category */}
-      <Modal isOpen={isCreateModalOpen} onClose={() => { setIsCreateModalOpen(false); setFormError(''); }} title="Create New Category">
+      <Modal isOpen={isCreateModalOpen} onClose={() => { setIsCreateModalOpen(false); setFormError(''); setSelectedTemplateName(null); }} title="Create New Category">
         <form onSubmit={handleCreate}>
           {formError && (
             <div style={{
@@ -548,6 +726,71 @@ export const Categories = ({ onNavigateExpenses }) => {
             />
           </div>
 
+          {/* Quick Select Category Templates */}
+          <div className="form-group">
+            <label className="form-label">Quick Select Template</label>
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))',
+              gap: '0.5rem',
+              maxHeight: '200px',
+              overflowY: 'auto',
+              padding: '0.25rem 0'
+            }}>
+              {CATEGORY_TEMPLATES.map((tmpl) => {
+                const isSelected = selectedTemplateName === tmpl.name;
+                return (
+                  <button
+                    key={tmpl.name}
+                    type="button"
+                    onClick={() => handleSelectTemplate(tmpl)}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.45rem',
+                      padding: '0.45rem 0.65rem',
+                      borderRadius: '8px',
+                      border: isSelected ? `2px solid ${tmpl.colorCode}` : '1px solid #E2E8F0',
+                      background: isSelected ? `${tmpl.colorCode}12` : '#F8FAFC',
+                      color: isSelected ? tmpl.colorCode : '#475569',
+                      fontSize: '0.78rem',
+                      fontWeight: isSelected ? '700' : '500',
+                      cursor: 'pointer',
+                      transition: 'var(--transition)',
+                      textAlign: 'left',
+                      lineHeight: 1.2
+                    }}
+                  >
+                    <span style={{ flexShrink: 0, color: tmpl.colorCode }}>{getTemplateIcon(tmpl.icon, 13)}</span>
+                    <span>{tmpl.name}</span>
+                  </button>
+                );
+              })}
+              <button
+                type="button"
+                onClick={handleSelectCustom}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.45rem',
+                  padding: '0.45rem 0.65rem',
+                  borderRadius: '8px',
+                  border: selectedTemplateName === 'CUSTOM' ? '2px solid #6366F1' : '1px solid #E2E8F0',
+                  background: selectedTemplateName === 'CUSTOM' ? '#EEF2FF' : '#F8FAFC',
+                  color: selectedTemplateName === 'CUSTOM' ? '#4F46E5' : '#475569',
+                  fontSize: '0.78rem',
+                  fontWeight: selectedTemplateName === 'CUSTOM' ? '700' : '500',
+                  cursor: 'pointer',
+                  transition: 'var(--transition)',
+                  textAlign: 'left'
+                }}
+              >
+                <Tag size={13} style={{ flexShrink: 0 }} />
+                <span>Custom</span>
+              </button>
+            </div>
+          </div>
+
           <div className="form-group">
             <label className="form-label">Monthly Budget Limit (₹)</label>
             <div style={{ position: 'relative' }}>
@@ -556,7 +799,7 @@ export const Categories = ({ onNavigateExpenses }) => {
                 step="0.01"
                 min="0"
                 className="form-input"
-                placeholder="0.00 (Leave 0 for no limit)"
+                placeholder="Leave empty for no limit"
                 value={formData.budgetLimit}
                 onChange={(e) => setFormData({ ...formData, budgetLimit: e.target.value })}
                 style={{ paddingLeft: '2.5rem' }}
@@ -600,7 +843,7 @@ export const Categories = ({ onNavigateExpenses }) => {
           </div>
 
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginTop: '1.5rem' }}>
-            <button type="button" onClick={() => setIsCreateModalOpen(false)} className="btn btn-secondary">
+            <button type="button" onClick={() => { setIsCreateModalOpen(false); setFormError(''); setSelectedTemplateName(null); }} className="btn btn-secondary">
               Cancel
             </button>
             <button type="submit" className="btn btn-primary">
@@ -759,6 +1002,64 @@ export const Categories = ({ onNavigateExpenses }) => {
           </div>
         </form>
       </Modal>
+
+      {/* Delete Confirmation Modal */}
+      {categoryToDelete && (
+        <Modal
+          isOpen={!!categoryToDelete}
+          onClose={() => { if (!isDeleting) setCategoryToDelete(null); }}
+          title={`Delete "${categoryToDelete.name}"?`}
+        >
+          <div>
+            {linkedExpensesForDelete.length > 0 ? (
+              <div style={{
+                padding: '0.85rem 1rem',
+                background: '#FFFBEB',
+                border: '1px solid #FDE68A',
+                borderRadius: '8px',
+                marginBottom: '1.25rem',
+                display: 'flex',
+                gap: '0.65rem',
+                alignItems: 'flex-start'
+              }}>
+                <AlertTriangle size={18} color="#D97706" style={{ flexShrink: 0, marginTop: '1px' }} />
+                <div style={{ fontSize: '0.85rem', color: '#92400E', lineHeight: 1.5 }}>
+                  <strong>This category has {linkedExpensesForDelete.length} linked transaction{linkedExpensesForDelete.length !== 1 ? 's' : ''}</strong>
+                  {spentOnCategoryToDelete > 0 && (
+                    <span> totalling {formatCurrency(spentOnCategoryToDelete)}</span>
+                  )}.
+                  <br />
+                  Deleting it will not remove those transactions, but they will no longer be associated with a category. This may affect reports and analytics.
+                </div>
+              </div>
+            ) : (
+              <p style={{ fontSize: '0.875rem', color: '#64748B', marginBottom: '1.25rem', lineHeight: 1.6 }}>
+                Are you sure you want to delete <strong style={{ color: '#0F172A' }}>{categoryToDelete.name}</strong>? This action cannot be undone.
+              </p>
+            )}
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem' }}>
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={() => setCategoryToDelete(null)}
+                disabled={isDeleting}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="btn btn-danger"
+                onClick={handleConfirmDelete}
+                disabled={isDeleting}
+                style={{ background: '#DC2626', color: '#fff', borderColor: '#DC2626' }}
+              >
+                {isDeleting ? 'Deleting...' : linkedExpensesForDelete.length > 0 ? 'Delete Anyway' : 'Delete Category'}
+              </button>
+            </div>
+          </div>
+        </Modal>
+      )}
 
       {/* Interactive Category Drill-Down Inspection Modal (P1) */}
       {inspectingCategory && (

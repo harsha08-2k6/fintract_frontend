@@ -73,17 +73,19 @@ export const CategoryCard = ({ category, spent = 0, onDelete, onEdit, onSelect }
               onClick={() => onEdit(category)}
               className="btn btn-secondary btn-icon"
               title="Edit category details & budget limit"
+              aria-label={`Edit ${category.name}`}
               style={{ padding: '0.35rem', color: '#64748B' }}
             >
               <Edit2 size={14} />
             </button>
           )}
 
-          {category.isCustom && onDelete && (
+          {(category.isCustom || category.custom || category.userId) && onDelete && (
             <button
               onClick={() => onDelete(category.id)}
               className="btn btn-secondary btn-icon"
               title="Delete category"
+              aria-label={`Delete ${category.name}`}
               style={{ color: '#DC2626', borderColor: '#FECACA', padding: '0.35rem' }}
             >
               <Trash2 size={14} />
