@@ -160,7 +160,8 @@ export const Categories = ({ onNavigateExpenses }) => {
     name: '',
     description: '',
     colorCode: '#10B981',
-    budgetLimit: ''
+    budgetLimit: '',
+    icon: 'tag'
   });
 
   const [isBulkBudgetModalOpen, setIsBulkBudgetModalOpen] = useState(false);
@@ -180,7 +181,18 @@ export const Categories = ({ onNavigateExpenses }) => {
       const rawExpList = Array.isArray(exps) ? exps : (exps?.content || []);
       const expList = rawExpList.filter(item => item.type !== 'INCOME');
 
-      setCategories(catList);
+      const uniqueCategories = Array.from(
+        new Map(
+          catList
+            .filter(category => category?.id != null && category?.name)
+            .sort((a, b) => Number(a.id) - Number(b.id))
+            .map(category => [
+              category.name.trim().replace(/\s+/g, ' ').toLowerCase(),
+              { ...category, name: category.name.trim() }
+            ])
+        ).values()
+      );
+      setCategories(uniqueCategories);
       setAllExpenses(expList);
     } catch (err) {
       console.error('Error fetching categories and expenses:', err);
@@ -294,7 +306,8 @@ export const Categories = ({ onNavigateExpenses }) => {
       name: '',
       description: '',
       colorCode: '#10B981',
-      budgetLimit: ''
+      budgetLimit: '',
+      icon: 'tag'
     });
     setIsCreateModalOpen(true);
   };
@@ -306,6 +319,7 @@ export const Categories = ({ onNavigateExpenses }) => {
       name: template.name,
       description: template.description,
       colorCode: template.colorCode,
+      icon: template.icon,
       // CRITICAL: Preserve current budgetLimit if entered, do NOT insert any monetary amount!
       budgetLimit: prev.budgetLimit || ''
     }));
@@ -313,19 +327,18 @@ export const Categories = ({ onNavigateExpenses }) => {
 
   const handleSelectCustom = () => {
     setSelectedTemplateName('CUSTOM');
+    setFormData(prev => ({ ...prev, icon: 'tag' }));
   };
 
   const handleOpenEdit = (category) => {
     setFormError('');
     setEditingCategory(category);
-    // If the category name matches a template, highlight that template; otherwise 'CUSTOM'
-    const matchedTmpl = CATEGORY_TEMPLATES.find(t => t.name.toLowerCase() === category.name.toLowerCase());
-    setSelectedTemplateName(matchedTmpl ? matchedTmpl.name : 'CUSTOM');
     setFormData({
       name: category.name,
       description: category.description || '',
       colorCode: category.colorCode || '#10B981',
-      budgetLimit: category.budgetLimit && parseFloat(category.budgetLimit) > 0 ? category.budgetLimit.toString() : ''
+      budgetLimit: category.budgetLimit && parseFloat(category.budgetLimit) > 0 ? category.budgetLimit.toString() : '',
+      icon: category.icon || 'tag'
     });
   };
 
@@ -394,10 +407,10 @@ export const Categories = ({ onNavigateExpenses }) => {
         description: formData.description.trim(),
         colorCode: formData.colorCode,
         budgetLimit: formData.budgetLimit ? Math.max(0, parseFloat(formData.budgetLimit)) : 0,
-        icon: 'tag'
+        icon: formData.icon || 'tag'
       });
       setIsCreateModalOpen(false);
-      setFormData({ name: '', description: '', colorCode: '#10B981', budgetLimit: '' });
+      setFormData({ name: '', description: '', colorCode: '#10B981', budgetLimit: '', icon: 'tag' });
       setSelectedTemplateName(null);
       await fetchCategoriesAndTransactions();
       showNotification('success', `Category "${created?.name || trimmedName}" created successfully.`);
@@ -436,7 +449,7 @@ export const Categories = ({ onNavigateExpenses }) => {
         description: formData.description.trim(),
         colorCode: formData.colorCode,
         budgetLimit: formData.budgetLimit ? Math.max(0, parseFloat(formData.budgetLimit)) : 0,
-        icon: editingCategory.icon || 'tag'
+        icon: formData.icon || editingCategory.icon || 'tag'
       });
       const updatedName = trimmedName;
       setEditingCategory(null);
