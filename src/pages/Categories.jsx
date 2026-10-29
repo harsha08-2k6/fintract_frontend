@@ -453,7 +453,7 @@ export const Categories = ({ onNavigateExpenses }) => {
       });
       const updatedName = trimmedName;
       setEditingCategory(null);
-      setFormData({ name: '', description: '', colorCode: '#10B981', budgetLimit: '' });
+      setFormData({ name: '', description: '', colorCode: '#10B981', budgetLimit: '', icon: 'tag' });
       setSelectedTemplateName(null);
       await fetchCategoriesAndTransactions();
       showNotification('success', `Category "${updatedName}" updated successfully.`);
@@ -552,7 +552,7 @@ export const Categories = ({ onNavigateExpenses }) => {
           </button>
           <button
             onClick={() => {
-              setFormData({ name: '', description: '', colorCode: '#10B981', budgetLimit: '' });
+              setFormData({ name: '', description: '', colorCode: '#10B981', budgetLimit: '', icon: 'tag' });
               setIsCreateModalOpen(true);
             }}
             className="btn btn-primary"
