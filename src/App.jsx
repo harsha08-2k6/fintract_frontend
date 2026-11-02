@@ -20,6 +20,7 @@ import { Reports } from './pages/Reports';
 import { Profile } from './pages/Profile';
 import { Goals } from './pages/Goals';
 import { NotFound } from './pages/NotFound';
+import { LandingPage } from './pages/LandingPage';
 
 const pagePaths = {
   dashboard: '/dashboard',
@@ -44,6 +45,7 @@ const getPageFromLocation = () => pathPages[window.location.pathname] || 'not-fo
 
 const getInitialAuthView = () => {
   const path = window.location.pathname;
+  if (path === '/') return 'landing';
   if (path === '/reset-password') return 'reset-password';
   if (path === '/forgot-password') return 'forgot-password';
   if (path === '/register') return 'register';
@@ -87,6 +89,14 @@ function MainLayout() {
   };
 
   if (!isAuthenticated) {
+    if (authView === 'landing' && window.location.pathname === '/') {
+      return (
+        <LandingPage
+          onNavigateLogin={() => navigateToAuth('login')}
+          onNavigateRegister={() => navigateToAuth('register')}
+        />
+      );
+    }
     if (authView === 'reset-password' || window.location.pathname === '/reset-password') {
       return (
         <ResetPassword
