@@ -1,321 +1,704 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useState } from 'react';
 import {
   ArrowRight,
   BarChart3,
-  BellRing,
   Check,
-  ClipboardList,
-  LockKeyhole,
+  ChevronDown,
+  Database,
+  KeyRound,
+  Layers,
   Menu,
   PiggyBank,
-  ReceiptText,
+  Receipt,
+  Search,
   ShieldCheck,
+  Sliders,
   TrendingUp,
-  WalletCards,
+  Wallet,
   X
 } from 'lucide-react';
 
 const features = [
   {
-    icon: ReceiptText,
+    icon: Receipt,
     title: 'Expense Tracking',
-    text: 'Capture everyday spending and keep every expense organized.',
-    intro: 'Keep daily spending organized in one clear expense workspace.',
-    details: ['Record and organize daily expenses.', 'Categorize spending.', 'Monitor where money goes.', 'Maintain an organized expense history.'],
-    howItWorks: 'Add expenses, assign categories, and review your history whenever you need a clearer view of your spending.'
+    description: 'Record and organize expenses with categories that make sense to you.'
   },
   {
     icon: TrendingUp,
     title: 'Income Management',
-    text: 'Bring income into one clear view and stay close to your goals.',
-    intro: 'Bring your earnings together so your income stays easy to understand.',
-    details: ['Record different income sources.', 'Monitor total income.', 'Maintain income history.', 'Understand your earnings.'],
-    howItWorks: 'Record income entries and review the history to understand how your earnings change over time.'
+    description: 'Keep track of your income sources and monitor your monthly earnings.'
   },
   {
     icon: PiggyBank,
-    title: 'Budget Planning',
-    text: 'Create practical budgets that make better decisions easier.',
-    intro: 'Set practical spending boundaries and keep your plans visible.',
-    details: ['Create monthly budgets.', 'Set category-wise spending limits.', 'Monitor budget utilization.', 'Manage spending more effectively.'],
-    howItWorks: 'Create a budget, define category limits, and use the dashboard to track how your spending compares with the plan.'
+    title: 'Monthly Budgets',
+    description: 'Set spending limits for individual categories and stay aware of your progress.'
   },
   {
     icon: BarChart3,
     title: 'Financial Analytics',
-    text: 'See patterns in your habits with focused, useful insights.',
-    intro: 'Turn organized financial activity into useful patterns and insights.',
-    details: ['Understand spending patterns.', 'View category-wise expense distribution.', 'Analyze income and expenses.', 'Make informed financial decisions.'],
-    howItWorks: 'Use the analytics views to compare income and expenses and explore how spending is distributed across categories.'
+    description: 'Understand spending habits through monthly summaries and visual reports.'
   },
   {
-    icon: ClipboardList,
+    icon: Search,
     title: 'Transaction Management',
-    text: 'Review and manage your financial activity with confidence.',
-    intro: 'Keep financial activity organized from one transaction history.',
-    details: ['View transaction history.', 'Add and manage transactions.', 'Edit or delete existing transactions.', 'Organize financial activities.'],
-    howItWorks: 'Open your transaction history to review activity, add new entries, or update and remove existing transactions.'
+    description: 'Search, filter, review, and manage your financial records in one place.'
   },
   {
-    icon: WalletCards,
-    title: 'Reports and Insights',
-    text: 'Turn organized information into a clearer financial picture.',
-    intro: 'Review summarized financial activity through focused reports.',
-    details: ['Generate financial reports.', 'Review spending summaries.', 'Understand financial trends.', 'Analyze financial activity.'],
-    howItWorks: 'Open Reports to review summaries and analyze trends from your recorded financial activity.'
-  },
-  {
-    icon: BellRing,
-    title: 'Notifications',
-    text: 'Stay informed with timely updates from your workspace.',
-    intro: 'Stay informed about important updates from your financial workspace.',
-    details: ['Receive relevant notifications.', 'Stay informed about financial activities.', 'Get budget-related updates.', 'View important account notifications.'],
-    howItWorks: 'Review notifications from the application workspace to keep up with relevant financial and account updates.'
-  },
-  {
-    icon: LockKeyhole,
-    title: 'Secure Authentication',
-    text: 'Your personal financial workspace is protected from the start.',
-    intro: 'Access FinTrack through its existing secure authentication flow.',
-    details: ['Secure user registration and login.', 'JWT-based authentication.', 'Protected application routes.', 'Secure access to personal financial information.'],
-    howItWorks: 'Register or sign in through the existing authentication pages; protected application areas remain available only after authentication.'
+    icon: Layers,
+    title: 'Reports & Notifications',
+    description: 'Get useful financial summaries and alerts when your spending approaches budget limits.'
   }
 ];
 
 const steps = [
-  { number: '01', title: 'Create Your Account', text: 'Sign up securely and access your personal financial workspace.' },
-  { number: '02', title: 'Manage Your Finances', text: 'Organize income, record expenses and create budgets.' },
-  { number: '03', title: 'Understand Your Spending', text: 'Use reports and analytics to understand financial habits and improve money management.' }
+  {
+    number: '01',
+    title: 'Create your account',
+    text: 'Register and access your personal financial workspace.'
+  },
+  {
+    number: '02',
+    title: 'Add your transactions',
+    text: 'Record income and expenses, organize categories, and set monthly budgets.'
+  },
+  {
+    number: '03',
+    title: 'Review your finances',
+    text: 'Monitor spending, review reports, and make informed financial decisions.'
+  }
+];
+
+const comparisonData = [
+  { capability: 'Expense Tracking', spreadsheets: 'Manual', fintrack: 'Organized' },
+  { capability: 'Budget Monitoring', spreadsheets: 'Manual formulas', fintrack: 'Category budgets' },
+  { capability: 'Income Tracking', spreadsheets: 'Separate sheets', fintrack: 'Unified ledger' },
+  { capability: 'Financial Reports', spreadsheets: 'Manual creation', fintrack: 'Automated summaries' },
+  { capability: 'Transaction Search', spreadsheets: 'Limited', fintrack: 'Built-in filters' }
+];
+
+const securityPillars = [
+  {
+    icon: KeyRound,
+    title: 'JWT-based authentication',
+    description: 'Cryptographically signed tokens ensure only authorized users access protected routes.'
+  },
+  {
+    icon: ShieldCheck,
+    title: 'API Gateway request management',
+    description: 'A central gateway strips unsafe client headers and routes requests to verified services.'
+  },
+  {
+    icon: Sliders,
+    title: 'User-level data access controls',
+    description: 'Every microservice strictly verifies user ownership before reading, creating, or modifying records.'
+  },
+  {
+    icon: Database,
+    title: 'Isolated PostgreSQL databases',
+    description: 'Dedicated database boundaries prevent data crossover between microservices.'
+  }
+];
+
+const faqs = [
+  {
+    q: 'Do I need to connect my bank account?',
+    a: 'No. You can manually record your income and expenses without sharing your banking credentials.'
+  },
+  {
+    q: 'Can I create custom categories?',
+    a: 'Yes. Create and manage categories according to your spending habits.'
+  },
+  {
+    q: 'Can I set monthly budgets?',
+    a: 'Yes. Assign spending limits to individual categories and monitor your usage.'
+  },
+  {
+    q: 'Does FinTrack support mobile devices?',
+    a: 'FinTrack is designed to be accessible through responsive web interfaces.'
+  },
+  {
+    q: 'Is FinTrack free?',
+    a: 'Get started with the available free features without requiring a credit card.'
+  }
 ];
 
 const FinTrackMark = () => (
-  <span className="landing-brand-mark" aria-hidden="true">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round">
+  <span className="brand-mark" aria-hidden="true">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
       <path d="M3 3v18h18" />
       <path d="m19 9-5 5-4-4-3 3" />
     </svg>
   </span>
 );
 
-const FeatureModal = ({ feature, onClose }) => {
-  const closeButtonRef = useRef(null);
-  const Icon = feature.icon;
-
-  useEffect(() => {
-    closeButtonRef.current?.focus();
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    const handleEscape = (event) => {
-      if (event.key === 'Escape') onClose();
-    };
-    document.addEventListener('keydown', handleEscape);
-    return () => {
-      document.body.style.overflow = previousOverflow;
-      document.removeEventListener('keydown', handleEscape);
-    };
-  }, [onClose]);
-
-  return (
-    <div className="landing-modal-backdrop" role="presentation" onClick={onClose}>
-      <section
-        className="landing-feature-modal"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="landing-feature-modal-title"
-        onClick={(event) => event.stopPropagation()}
-      >
-        <button
-          ref={closeButtonRef}
-          className="landing-modal-close"
-          type="button"
-          aria-label="Close feature information"
-          onClick={onClose}
-        >
-          <X size={20} />
-        </button>
-        <div className="landing-feature-icon"><Icon size={22} /></div>
-        <h2 id="landing-feature-modal-title">{feature.title}</h2>
-        <p className="landing-modal-intro">{feature.intro}</p>
-        <h3>Key benefits</h3>
-        <ul className="landing-modal-list">
-          {feature.details.map((detail) => <li key={detail}><Check size={16} />{detail}</li>)}
-        </ul>
-        <h3>How it works</h3>
-        <p>{feature.howItWorks}</p>
-      </section>
-    </div>
-  );
-};
-
 export const LandingPage = ({ onNavigateLogin, onNavigateRegister }) => {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [selectedFeature, setSelectedFeature] = useState(null);
+  const [openFaq, setOpenFaq] = useState(0);
+
+  // Savings Calculator State
+  const [calcIncome, setCalcIncome] = useState(80000);
+  const [calcExpenses, setCalcExpenses] = useState(45000);
+  const [calcRate, setCalcRate] = useState(7);
+  const [calcYears, setCalcYears] = useState(3);
 
   const closeMenu = () => setMenuOpen(false);
 
-  useEffect(() => {
-    if (!selectedFeature) return undefined;
-    const handleEscape = (event) => {
-      if (event.key === 'Escape') setSelectedFeature(null);
-    };
-    document.addEventListener('keydown', handleEscape);
-    return () => document.removeEventListener('keydown', handleEscape);
-  }, [selectedFeature]);
+  // Calculations
+  const monthlySurplus = Math.max(0, calcIncome - calcExpenses);
+  const totalBaseSavings = monthlySurplus * 12 * calcYears;
+  
+  // Future Value with regular monthly deposits at annual rate r
+  const monthlyRate = calcRate / 100 / 12;
+  const totalMonths = calcYears * 12;
+  const projectedWithGrowth = monthlyRate > 0 && monthlySurplus > 0
+    ? Math.round(monthlySurplus * ((Math.pow(1 + monthlyRate, totalMonths) - 1) / monthlyRate))
+    : totalBaseSavings;
+  const potentialGrowth = Math.max(0, projectedWithGrowth - totalBaseSavings);
 
-  const handleFeatureClick = (feature) => setSelectedFeature(feature);
-
-  const handleFeatureKeyDown = (event, feature) => {
-    if (event.key === 'Enter' || event.key === ' ') {
-      event.preventDefault();
-      handleFeatureClick(feature);
-    }
-  };
+  const formatINR = (val) => '₹' + Number(val || 0).toLocaleString('en-IN');
 
   return (
-    <div className="landing-page">
-      <header className="landing-nav">
-        <a className="landing-brand" href="#home" onClick={closeMenu} aria-label="FinTrack home">
-          <FinTrackMark />
-          <span>Fin<span>Track</span></span>
-        </a>
-        <button className="landing-menu-button" onClick={() => setMenuOpen(!menuOpen)} aria-label="Toggle navigation">
-          {menuOpen ? <X size={22} /> : <Menu size={22} />}
-        </button>
-        <nav className={`landing-links ${menuOpen ? 'is-open' : ''}`} aria-label="Main navigation">
-          <a href="#home" onClick={closeMenu}>Home</a>
-          <a href="#features" onClick={closeMenu}>Features</a>
-          <a href="#how-it-works" onClick={closeMenu}>How It Works</a>
-          <a href="#about" onClick={closeMenu}>About Us</a>
-          <button className="landing-login-link" onClick={() => { closeMenu(); onNavigateLogin(); }}>Login</button>
-          <button className="landing-nav-cta" onClick={() => { closeMenu(); onNavigateRegister(); }}>
-            Get Started <ArrowRight size={16} />
+    <div className="ft-landing">
+      {/* Navigation */}
+      <header className="ft-nav">
+        <div className="ft-nav-inner">
+          <a className="ft-brand" href="#home" onClick={closeMenu} aria-label="FinTrack Home">
+            <FinTrackMark />
+            <span>Fin<span>Track</span></span>
+          </a>
+
+          <button
+            className="ft-menu-btn"
+            onClick={() => setMenuOpen(!menuOpen)}
+            aria-label="Toggle navigation"
+          >
+            {menuOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
-        </nav>
+
+          <nav className={`ft-links ${menuOpen ? 'is-open' : ''}`} aria-label="Main navigation">
+            <a href="#features" onClick={closeMenu}>Features</a>
+            <a href="#preview" onClick={closeMenu}>Product Preview</a>
+            <a href="#calculator" onClick={closeMenu}>Savings Calculator</a>
+            <a href="#how-it-works" onClick={closeMenu}>How It Works</a>
+            <a href="#security" onClick={closeMenu}>Security</a>
+            <a href="#faq" onClick={closeMenu}>FAQ</a>
+            
+            <div className="ft-nav-actions">
+              <button className="ft-btn-text" onClick={() => { closeMenu(); onNavigateLogin(); }}>
+                Sign In
+              </button>
+              <button className="ft-btn-primary" onClick={() => { closeMenu(); onNavigateRegister(); }}>
+                Get Started
+              </button>
+            </div>
+          </nav>
+        </div>
       </header>
 
       <main>
-        <section className="landing-hero" id="home">
-          <div className="landing-hero-copy">
-            <div className="landing-eyebrow">A clearer way to manage your money</div>
-            <h1>Take Control of Your Finances. <em>Build a Smarter Future.</em></h1>
-            <p>Manage your income, track expenses, plan budgets and understand your financial habits with FinTrack. Everything you need to manage your money in one place.</p>
-            <div className="landing-actions">
-              <button className="landing-primary-button" onClick={onNavigateRegister}>Get Started Free <ArrowRight size={18} /></button>
-              <button className="landing-secondary-button" onClick={onNavigateLogin}>Login</button>
+        {/* HERO SECTION */}
+        <section className="ft-hero" id="home">
+          <div className="ft-hero-header">
+            <span className="ft-eyebrow">Personal finance, made clearer</span>
+            <h1>Take control of your finances.</h1>
+            <p>
+              Track income, manage expenses, set monthly budgets, and understand where your money goes.
+              FinTrack brings your financial activity together in one simple workspace.
+            </p>
+            <div className="ft-hero-cta">
+              <button className="ft-btn-primary" onClick={onNavigateRegister}>
+                Get Started
+              </button>
+              <a href="#features" className="ft-btn-secondary">
+                Explore Features
+              </a>
             </div>
-            <div className="landing-trust-row">
-              <span><Check size={15} /> Simple to use</span>
-              <span><Check size={15} /> Built for clarity</span>
-              <span><Check size={15} /> Secure by design</span>
-            </div>
+            <span className="ft-hero-subtext">No credit card required. Free to get started.</span>
           </div>
-          <div className="landing-hero-art" aria-hidden="true">
-            <div className="hero-accent-panel">
-              <FinTrackMark />
-              <span className="hero-accent-line" />
-              <span className="hero-accent-line hero-accent-line-short" />
-              <span className="hero-accent-caption">Organize. Understand. Grow.</span>
+
+          {/* REALISTIC FINTRACK DASHBOARD PREVIEW */}
+          <div className="ft-preview-wrapper" id="preview">
+            <div className="ft-dashboard-window">
+              <div className="ft-window-topbar">
+                <div className="ft-window-controls">
+                  <span className="ft-ctrl-dot" />
+                  <span className="ft-ctrl-dot" />
+                  <span className="ft-ctrl-dot" />
+                </div>
+                <div className="ft-window-path">
+                  <span>FinTrack Dashboard</span>
+                  <span className="ft-path-sep">/</span>
+                  <span className="ft-path-active">October 2026</span>
+                </div>
+                <div className="ft-window-status">
+                  <span className="ft-status-indicator" />
+                  <span>Reconciled</span>
+                </div>
+              </div>
+
+              <div className="ft-dashboard-body">
+                {/* 4 Financial Pillar Metric Cards */}
+                <div className="ft-metrics-grid">
+                  <div className="ft-metric-card">
+                    <span className="ft-metric-label">Net Balance</span>
+                    <span className="ft-metric-val ft-val-green">₹1,52,400</span>
+                    <span className="ft-metric-sub">Monthly cash surplus</span>
+                  </div>
+                  <div className="ft-metric-card">
+                    <span className="ft-metric-label">Income</span>
+                    <span className="ft-metric-val">₹2,10,000</span>
+                    <span className="ft-metric-sub">Earned this month</span>
+                  </div>
+                  <div className="ft-metric-card">
+                    <span className="ft-metric-label">Expenses</span>
+                    <span className="ft-metric-val">₹57,600</span>
+                    <span className="ft-metric-sub">Logged outlays</span>
+                  </div>
+                  <div className="ft-metric-card">
+                    <span className="ft-metric-label">Savings Rate</span>
+                    <span className="ft-metric-val ft-val-blue">72.5%</span>
+                    <span className="ft-metric-sub">Portion of income retained</span>
+                  </div>
+                </div>
+
+                {/* Dashboard Middle Split: Overview & Budgets */}
+                <div className="ft-dashboard-split">
+                  {/* Monthly Spending Overview */}
+                  <div className="ft-panel">
+                    <div className="ft-panel-header">
+                      <h3>Monthly Spending Overview</h3>
+                      <span className="ft-badge">Current Month</span>
+                    </div>
+                    <div className="ft-chart-mock">
+                      <div className="ft-chart-bars">
+                        <div className="ft-bar-col"><div className="ft-bar-fill" style={{ height: '35%' }} /><span>W1</span></div>
+                        <div className="ft-bar-col"><div className="ft-bar-fill" style={{ height: '58%' }} /><span>W2</span></div>
+                        <div className="ft-bar-col"><div className="ft-bar-fill" style={{ height: '44%' }} /><span>W3</span></div>
+                        <div className="ft-bar-col"><div className="ft-bar-fill ft-bar-active" style={{ height: '72%' }} /><span>W4</span></div>
+                      </div>
+                      <div className="ft-chart-summary">
+                        <span>Average daily spend: <strong>₹1,850</strong></span>
+                        <span>Spending pace: <strong>On target</strong></span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Category Budgets */}
+                  <div className="ft-panel">
+                    <div className="ft-panel-header">
+                      <h3>Category Budgets</h3>
+                      <span className="ft-badge">2 of 6 Set</span>
+                    </div>
+                    <div className="ft-budgets-list">
+                      <div className="ft-budget-row">
+                        <div className="ft-budget-labels">
+                          <span className="ft-budget-name">Food &amp; Dining</span>
+                          <span className="ft-budget-amounts">₹12,400 / ₹18,000</span>
+                        </div>
+                        <div className="ft-progress-track">
+                          <div className="ft-progress-fill" style={{ width: '68%', backgroundColor: '#10B981' }} />
+                        </div>
+                        <span className="ft-budget-foot">68% used • ₹5,600 remaining</span>
+                      </div>
+
+                      <div className="ft-budget-row">
+                        <div className="ft-budget-labels">
+                          <span className="ft-budget-name">Bills &amp; Utilities</span>
+                          <span className="ft-budget-amounts">₹8,500 / ₹12,000</span>
+                        </div>
+                        <div className="ft-progress-track">
+                          <div className="ft-progress-fill" style={{ width: '70%', backgroundColor: '#10B981' }} />
+                        </div>
+                        <span className="ft-budget-foot">70% used • ₹3,500 remaining</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Recent Transactions Table */}
+                <div className="ft-panel ft-panel-full">
+                  <div className="ft-panel-header">
+                    <h3>Recent Transactions</h3>
+                    <span className="ft-panel-link">Latest activity</span>
+                  </div>
+                  <div className="ft-table-wrapper">
+                    <table className="ft-table">
+                      <thead>
+                        <tr>
+                          <th>Date</th>
+                          <th>Description</th>
+                          <th>Category</th>
+                          <th>Type</th>
+                          <th style={{ textAlign: 'right' }}>Amount</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td className="ft-td-muted">Oct 28, 2026</td>
+                          <td className="ft-td-bold">Consulting Client Retainer</td>
+                          <td><span className="ft-tag ft-tag-income">Income</span></td>
+                          <td className="ft-td-muted">Bank Transfer</td>
+                          <td className="ft-td-amount ft-val-green">+₹85,000</td>
+                        </tr>
+                        <tr>
+                          <td className="ft-td-muted">Oct 27, 2026</td>
+                          <td className="ft-td-bold">Monthly Grocery Supplies</td>
+                          <td><span className="ft-tag">Food &amp; Dining</span></td>
+                          <td className="ft-td-muted">Card</td>
+                          <td className="ft-td-amount">-₹3,850</td>
+                        </tr>
+                        <tr>
+                          <td className="ft-td-muted">Oct 26, 2026</td>
+                          <td className="ft-td-bold">Fiber Internet Subscription</td>
+                          <td><span className="ft-tag">Bills &amp; Utilities</span></td>
+                          <td className="ft-td-muted">UPI</td>
+                          <td className="ft-td-amount">-₹1,499</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div className="hero-accent-note"><ShieldCheck size={17} /> Secure by design</div>
           </div>
         </section>
 
-        <section className="landing-section landing-features" id="features">
-          <div className="landing-section-heading">
-            <div className="landing-eyebrow">Everything in one place</div>
-            <h2>Make your money <em>make more sense.</em></h2>
-            <p>A focused toolkit for building better financial habits, without the clutter.</p>
+        {/* FEATURES */}
+        <section className="ft-section" id="features">
+          <div className="ft-section-header">
+            <h2>Everything you need to manage your money.</h2>
+            <p>
+              A clear view of your finances, from everyday transactions to monthly spending patterns.
+            </p>
           </div>
-          <div className="landing-feature-grid">
-            {features.map((feature) => {
-              const { icon: Icon, title, text } = feature;
+
+          <div className="ft-features-grid">
+            {features.map((item) => {
+              const Icon = item.icon;
               return (
-              <article
-                className="landing-feature-card"
-                key={title}
-                role="button"
-                tabIndex="0"
-                aria-label={`Open ${title}`}
-                onClick={() => handleFeatureClick(feature)}
-                onKeyDown={(event) => handleFeatureKeyDown(event, feature)}
-              >
-                <div className="landing-feature-icon"><Icon size={20} /></div>
-                <h3>{title}</h3>
-                <p>{text}</p>
-                <ArrowRight className="landing-feature-arrow" size={17} />
-              </article>
+                <div className="ft-feature-card" key={item.title}>
+                  <div className="ft-feature-icon">
+                    <Icon size={20} />
+                  </div>
+                  <h3>{item.title}</h3>
+                  <p>{item.description}</p>
+                </div>
               );
             })}
           </div>
         </section>
 
-        <section className="landing-section landing-steps" id="how-it-works">
-          <div className="landing-section-heading">
-            <div className="landing-eyebrow">A clearer way forward</div>
-            <h2>From scattered to <em>sorted.</em></h2>
-            <p>FinTrack gives your financial life a simple rhythm you can keep up with.</p>
+        {/* PRODUCT PREVIEW HIGHLIGHT SECTION */}
+        <section className="ft-section ft-section-alt">
+          <div className="ft-section-header">
+            <h2>Your finances, all in one place.</h2>
+            <p>
+              See your income, expenses, budgets, and available balance without switching between
+              spreadsheets or multiple applications.
+            </p>
+            <div style={{ marginTop: '1.5rem' }}>
+              <button className="ft-btn-primary" onClick={onNavigateRegister}>
+                Explore the Dashboard
+              </button>
+            </div>
           </div>
-          <div className="landing-step-grid">
-            {steps.map((step, index) => (
-              <article className="landing-step" key={step.number}>
-                <div className="landing-step-number">{step.number}</div>
-                {index < steps.length - 1 && <div className="landing-step-connector" />}
-                <h3>{step.title}</h3>
-                <p>{step.text}</p>
-              </article>
+        </section>
+
+        {/* SAVINGS CALCULATOR */}
+        <section className="ft-section" id="calculator">
+          <div className="ft-section-header">
+            <h2>See how much you could save.</h2>
+            <p>Enter your monthly income and expenses to estimate your potential savings.</p>
+          </div>
+
+          <div className="ft-calculator-card">
+            <div className="ft-calc-inputs">
+              <div className="ft-calc-group">
+                <div className="ft-calc-label-row">
+                  <label htmlFor="inflow-input">Monthly Income</label>
+                  <span className="ft-calc-display">{formatINR(calcIncome)}</span>
+                </div>
+                <input
+                  id="inflow-input"
+                  type="range"
+                  min="20000"
+                  max="400000"
+                  step="5000"
+                  value={calcIncome}
+                  onChange={(e) => setCalcIncome(Number(e.target.value))}
+                  className="ft-slider"
+                />
+                <div className="ft-slider-bounds">
+                  <span>₹20,000</span>
+                  <span>₹4,00,000</span>
+                </div>
+              </div>
+
+              <div className="ft-calc-group">
+                <div className="ft-calc-label-row">
+                  <label htmlFor="outflow-input">Monthly Expenses</label>
+                  <span className="ft-calc-display">{formatINR(calcExpenses)}</span>
+                </div>
+                <input
+                  id="outflow-input"
+                  type="range"
+                  min="10000"
+                  max="350000"
+                  step="2500"
+                  value={calcExpenses}
+                  onChange={(e) => setCalcExpenses(Number(e.target.value))}
+                  className="ft-slider"
+                />
+                <div className="ft-slider-bounds">
+                  <span>₹10,000</span>
+                  <span>₹3,50,000</span>
+                </div>
+              </div>
+
+              <div className="ft-calc-row-split">
+                <div className="ft-calc-group">
+                  <div className="ft-calc-label-row">
+                    <label htmlFor="rate-input">Investment Growth Rate</label>
+                    <span className="ft-calc-display">{calcRate}% p.a.</span>
+                  </div>
+                  <input
+                    id="rate-input"
+                    type="range"
+                    min="4"
+                    max="14"
+                    step="1"
+                    value={calcRate}
+                    onChange={(e) => setCalcRate(Number(e.target.value))}
+                    className="ft-slider"
+                  />
+                </div>
+
+                <div className="ft-calc-group">
+                  <label>Time Period</label>
+                  <div className="ft-years-toggle">
+                    {[1, 3, 5, 10].map((y) => (
+                      <button
+                        key={y}
+                        type="button"
+                        className={`ft-year-btn ${calcYears === y ? 'active' : ''}`}
+                        onClick={() => setCalcYears(y)}
+                      >
+                        {y} {y === 1 ? 'Year' : 'Years'}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="ft-calc-results">
+              <div className="ft-results-title">Your Estimated Savings</div>
+
+              <div className="ft-results-grid">
+                <div className="ft-res-item">
+                  <span className="ft-res-lbl">Monthly Surplus</span>
+                  <span className="ft-res-val ft-val-green">{formatINR(monthlySurplus)}</span>
+                  <span className="ft-res-sub">Unspent monthly income</span>
+                </div>
+
+                <div className="ft-res-item">
+                  <span className="ft-res-lbl">Projected Savings</span>
+                  <span className="ft-res-val">{formatINR(totalBaseSavings)}</span>
+                  <span className="ft-res-sub">Principal saved over {calcYears} years</span>
+                </div>
+
+                <div className="ft-res-item">
+                  <span className="ft-res-lbl">Potential Growth</span>
+                  <span className="ft-res-val ft-val-blue">{formatINR(potentialGrowth)}</span>
+                  <span className="ft-res-sub">Estimated return at {calcRate}% annual growth</span>
+                </div>
+              </div>
+
+              <div className="ft-total-savings-box">
+                <span className="ft-ts-label">Total Estimated Value ({calcYears} Years)</span>
+                <span className="ft-ts-value">{formatINR(projectedWithGrowth)}</span>
+              </div>
+
+              <button className="ft-btn-primary ft-btn-block" onClick={onNavigateRegister}>
+                Create Your Financial Plan
+              </button>
+
+              <span className="ft-calc-disclaimer">
+                Projections are illustrative estimates, not guaranteed returns.
+              </span>
+            </div>
+          </div>
+        </section>
+
+        {/* HOW IT WORKS */}
+        <section className="ft-section ft-section-alt" id="how-it-works">
+          <div className="ft-section-header">
+            <h2>Getting started is simple.</h2>
+            <p>Three straightforward steps to establish your financial workspace.</p>
+          </div>
+
+          <div className="ft-steps-grid">
+            {steps.map((s) => (
+              <div className="ft-step-item" key={s.number}>
+                <span className="ft-step-num">{s.number}</span>
+                <h3>{s.title}</h3>
+                <p>{s.text}</p>
+              </div>
             ))}
           </div>
         </section>
 
-        <section className="landing-value-section" id="about">
-          <div className="landing-value-glow" />
-          <div className="landing-value-copy">
-            <div className="landing-eyebrow">Why FinTrack</div>
-            <h2>Confidence starts with <em>clarity.</em></h2>
-            <p>Good money management should feel approachable. FinTrack helps you build a calm, organized view of your finances so every decision can be more intentional.</p>
-            <div className="landing-value-list">
-              {['Simple financial management', 'Organized expense tracking', 'Better budget control', 'Clear financial insights', 'Secure account access'].map(item => (
-                <span key={item}><Check size={16} /> {item}</span>
-              ))}
-            </div>
+        {/* COMPARISON */}
+        <section className="ft-section" id="comparison">
+          <div className="ft-section-header">
+            <h2>A better way to manage everyday finances.</h2>
+            <p>Compare the FinTrack workspace against traditional manual spreadsheet tracking.</p>
           </div>
-          <div className="landing-value-art">
-            <div className="value-ring value-ring-one" />
-            <div className="value-ring value-ring-two" />
-            <div className="value-lock"><ShieldCheck size={42} /></div>
+
+          <div className="ft-comparison-card">
+            <table className="ft-comparison-table">
+              <thead>
+                <tr>
+                  <th>Capability</th>
+                  <th>Spreadsheets</th>
+                  <th className="ft-col-highlight">FinTrack</th>
+                </tr>
+              </thead>
+              <tbody>
+                {comparisonData.map((row) => (
+                  <tr key={row.capability}>
+                    <td className="ft-td-cap">{row.capability}</td>
+                    <td className="ft-td-muted">{row.spreadsheets}</td>
+                    <td className="ft-col-highlight ft-td-bold">
+                      <Check size={16} className="ft-check-icon" />
+                      <span>{row.fintrack}</span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </section>
 
-        <section className="landing-cta">
-          <div className="landing-cta-inner">
-            <div className="landing-eyebrow">Start with a better view</div>
-            <h2>Make Every Financial Decision Count.</h2>
-            <p>Start organizing your finances and take the next step towards smarter money management.</p>
-            <div className="landing-actions">
-              <button className="landing-primary-button" onClick={onNavigateRegister}>Get Started <ArrowRight size={18} /></button>
-              <button className="landing-ghost-button" onClick={onNavigateLogin}>Login</button>
+        {/* SECURITY & ARCHITECTURE */}
+        <section className="ft-section ft-section-alt" id="security">
+          <div className="ft-section-header">
+            <h2>Your financial data deserves protection.</h2>
+            <p>
+              FinTrack uses authentication, controlled API access, and isolated microservices to
+              protect application operations and user data.
+            </p>
+          </div>
+
+          <div className="ft-security-grid">
+            {securityPillars.map((item) => {
+              const Icon = item.icon;
+              return (
+                <div className="ft-security-card" key={item.title}>
+                  <div className="ft-sec-icon">
+                    <Icon size={20} />
+                  </div>
+                  <h3>{item.title}</h3>
+                  <p>{item.description}</p>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* FAQ */}
+        <section className="ft-section" id="faq">
+          <div className="ft-section-header">
+            <h2>Frequently Asked Questions</h2>
+            <p>Common questions about using FinTrack to manage personal finances.</p>
+          </div>
+
+          <div className="ft-faq-list">
+            {faqs.map((faq, idx) => {
+              const isOpen = openFaq === idx;
+              return (
+                <div key={faq.q} className={`ft-faq-item ${isOpen ? 'open' : ''}`}>
+                  <button
+                    className="ft-faq-trigger"
+                    type="button"
+                    onClick={() => setOpenFaq(isOpen ? -1 : idx)}
+                    aria-expanded={isOpen}
+                  >
+                    <span>{faq.q}</span>
+                    <ChevronDown size={18} className={`ft-faq-chevron ${isOpen ? 'rotated' : ''}`} />
+                  </button>
+                  {isOpen && (
+                    <div className="ft-faq-answer">
+                      <p>{faq.a}</p>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* FINAL CTA */}
+        <section className="ft-cta-section">
+          <div className="ft-cta-box">
+            <h2>Make better decisions with your money.</h2>
+            <p>
+              Bring your income, expenses, and budgets together. Start understanding your finances with
+              FinTrack.
+            </p>
+            <div className="ft-cta-actions">
+              <button className="ft-btn-primary" onClick={onNavigateRegister}>
+                Get Started Free
+              </button>
+              <button className="ft-btn-secondary" onClick={onNavigateLogin}>
+                Sign In
+              </button>
             </div>
           </div>
         </section>
       </main>
 
-      {selectedFeature && (
-        <FeatureModal
-          feature={selectedFeature}
-          onClose={() => setSelectedFeature(null)}
-        />
-      )}
-
-      <footer className="landing-footer">
-        <div className="landing-footer-main">
-          <div className="landing-footer-brand">
-            <a className="landing-brand" href="#home"><FinTrackMark /><span>Fin<span>Track</span></span></a>
-            <p>A simpler way to understand your money and build a smarter future.</p>
+      {/* FOOTER */}
+      <footer className="ft-footer">
+        <div className="ft-footer-inner">
+          <div className="ft-footer-brand">
+            <a className="ft-brand" href="#home">
+              <FinTrackMark />
+              <span>Fin<span>Track</span></span>
+            </a>
+            <p>
+              A simpler way to track income, manage expenses, and understand your finances.
+            </p>
           </div>
-          <div className="landing-footer-column"><h3>Explore</h3><a href="#features">Features</a><a href="#how-it-works">How It Works</a><a href="#about">About Us</a></div>
-          <div className="landing-footer-column"><h3>Account</h3><button onClick={onNavigateLogin}>Login</button><button onClick={onNavigateRegister}>Registration</button></div>
+
+          <div className="ft-footer-col">
+            <h4>Product</h4>
+            <a href="#features">Expense Tracking</a>
+            <a href="#features">Income Management</a>
+            <a href="#features">Category Budgets</a>
+            <a href="#features">Analytics &amp; Reports</a>
+          </div>
+
+          <div className="ft-footer-col">
+            <h4>Resources</h4>
+            <a href="#calculator">Savings Calculator</a>
+            <a href="#preview">Product Preview</a>
+            <a href="#how-it-works">How It Works</a>
+            <a href="#faq">FAQ</a>
+          </div>
+
+          <div className="ft-footer-col">
+            <h4>Account</h4>
+            <button type="button" onClick={onNavigateLogin}>Sign In</button>
+            <button type="button" onClick={onNavigateRegister}>Create Account</button>
+          </div>
         </div>
-        <div className="landing-footer-bottom"><span>© {new Date().getFullYear()} FinTrack. All rights reserved.</span><span>Organize. Understand. Grow.</span></div>
+
+        <div className="ft-footer-bottom">
+          <span>&copy; {new Date().getFullYear()} FinTrack. All rights reserved.</span>
+          <span>Organize your finances. Make informed decisions.</span>
+        </div>
       </footer>
     </div>
   );
