@@ -1,4 +1,5 @@
 import { apiRequest } from './api';
+import { getStoredToken } from '../utils/tokenUtils';
 
 function getLocalExpenses() {
   try {
@@ -31,7 +32,11 @@ export const expenseService = {
 
       const queryString = query.toString() ? `?${query.toString()}` : '';
       return await apiRequest(`/api/expenses${queryString}`);
-    } catch {
+    } catch (err) {
+      if (getStoredToken()) {
+        console.error('Failed to fetch expenses from server:', err);
+        throw err;
+      }
       let list = getLocalExpenses();
       if (params.categoryId) {
         list = list.filter(e => e.categoryId === parseInt(params.categoryId));

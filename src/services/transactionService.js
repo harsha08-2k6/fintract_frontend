@@ -1,4 +1,5 @@
 import { apiRequest } from './api';
+import { getStoredToken } from '../utils/tokenUtils';
 
 export const transactionService = {
   // Unified Transactions
@@ -14,6 +15,10 @@ export const transactionService = {
       const data = await apiRequest(endpoint, { method: 'GET' });
       return data || [];
     } catch (err) {
+      if (getStoredToken()) {
+        console.error('Failed to fetch transactions from server:', err);
+        throw err;
+      }
       return getLocalTransactions(params);
     }
   },
@@ -29,6 +34,10 @@ export const transactionService = {
         body: JSON.stringify(data)
       });
     } catch (err) {
+      if (getStoredToken()) {
+        console.error('Failed to create transaction on server:', err);
+        throw err;
+      }
       return saveLocalTransaction(data);
     }
   },
@@ -40,6 +49,10 @@ export const transactionService = {
         body: JSON.stringify(data)
       });
     } catch (err) {
+      if (getStoredToken()) {
+        console.error('Failed to update transaction on server:', err);
+        throw err;
+      }
       const list = getLocalTransactions();
       const updated = list.find(transaction => String(transaction.id) === String(id));
       if (!updated) throw err;
@@ -56,6 +69,10 @@ export const transactionService = {
       await apiRequest(`/api/transactions/${id}`, { method: 'DELETE' });
       return true;
     } catch (err) {
+      if (getStoredToken()) {
+        console.error('Failed to delete transaction on server:', err);
+        throw err;
+      }
       deleteLocalTransaction(id);
       return true;
     }
