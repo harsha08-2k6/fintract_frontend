@@ -44,11 +44,19 @@ export const notificationService = {
   },
 
   async markAsRead(id) {
-    return apiRequest(`/api/notifications/${encodeURIComponent(id)}/read`, { method: 'PATCH' });
+    try {
+      return await apiRequest(`/api/notifications/${encodeURIComponent(id)}/read`, { method: 'PATCH' });
+    } catch {
+      return await apiRequest(`/api/notifications/${encodeURIComponent(id)}/read`, { method: 'POST' });
+    }
   },
 
   async markAllAsRead() {
-    return apiRequest('/api/notifications/read-all', { method: 'PATCH' });
+    try {
+      return await apiRequest('/api/notifications/read-all', { method: 'PATCH' });
+    } catch {
+      return await apiRequest('/api/notifications/read-all', { method: 'POST' });
+    }
   },
 
   async dismissNotification(id) {
